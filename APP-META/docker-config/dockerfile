@@ -1,0 +1,34 @@
+FROM reg.docker.alibaba-inc.com/zeroplus/openjdk:8-alpine
+
+#必要时，可以不开启以下工具软件安装，会拖慢在产研运维平台上的构建时间。tcpdump之后的是新加的
+# RUN apk add --no-cache curl bash lsof vim htop busybox-extras coreutils tcpdump logrotate supervisor
+USER root
+
+#arthas
+RUN mkdir /arthas
+COPY /APP-META/arthas/arthas-3.1.0-bin.zip /arthas/
+RUN unzip /arthas/arthas-3.1.0-bin.zip -d /arthas/ \
+    && rm /arthas/arthas-3.1.0-bin.zip
+
+COPY /target/ssc-1.0-SNAPSHOT.jar /root/deploy/
+
+ENV JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF-8"
+ENV JAVA_OPTS="${JAVA_OPTS} -Dnacos.standalone=true"
+ENV JAVA_OPTS="${JAVA_OPTS} -Dnacos.core.auth.enabled=false"
+ENV JAVA_OPTS="${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000"
+ENV server.tomcat.basedir=/root/deploy
+
+ENV TZ=Asia/Shanghai
+
+# 创建一个启动脚本，启动Nginx和Java应用
+#RUN echo '#!/bin/sh' > /root/deploy/start.sh && \
+#    echo 'java -jar ${JAVA_OPTS} /root/deploy/mediAsst-0.0.1-SNAPSHOT.jar' >> /root/deploy/start.sh && \
+#    echo 'tail -f /dev/null' >> /root/deploy/start.sh
+
+COPY /APP-META/shell/start.sh /root/deploy/start.sh
+
+RUN chmod +x /root/deploy/start.sh
+
+WORKDIR /root/deploy/
+
+CMD ["sh", "-c", "/root/deploy/start.sh"]
