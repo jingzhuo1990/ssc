@@ -8,7 +8,7 @@ import java.util.Date;
  * @author: yehang
  * @create: 2024-03-29 09:50
  **/
-public class Detail {
+public class SscDetail {
     
     private Integer game_id;
     private String game_value;

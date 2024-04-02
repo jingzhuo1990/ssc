@@ -1,6 +1,7 @@
 package com.yh.ssc.event;
 
 import com.yh.ssc.data.dataobject.SscData;
+import com.yh.ssc.dto.SscDataDTO;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -16,7 +17,7 @@ public class NewCycleEvent extends ApplicationEvent {
      * @param sscData the object on which the event initially occurred or with which the event is associated (never
      *               {@code null})
      */
-    public NewCycleEvent(SscData sscData) {
+    public NewCycleEvent(SscDataDTO sscData) {
         super(sscData);
     }
     

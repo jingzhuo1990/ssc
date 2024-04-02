@@ -8,5 +8,5 @@ public interface SscDataService {
     
     QueryData query(Integer gameId,Integer rowCnt);
     
-    void send(Long cycleId,Integer multiple,List<List<String>> data);
+    void send(Long cycleId,Integer multiple,List<List<Integer>> data);
 }

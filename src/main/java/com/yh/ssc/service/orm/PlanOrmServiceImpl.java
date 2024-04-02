@@ -1,8 +1,11 @@
 package com.yh.ssc.service.orm;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yh.ssc.converter.PlanConverter;
 import com.yh.ssc.data.dataobject.Plan;
 import com.yh.ssc.data.mapper.PlanMapper;
+import com.yh.ssc.dto.PlanDTO;
+import com.yh.ssc.event.publish.EventPublisher;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -19,10 +22,16 @@ public class PlanOrmServiceImpl extends ServiceImpl<PlanMapper, Plan> implements
     
     @Resource
     private PlanMapper planMapper;
+    
+    @Resource
+    private EventPublisher eventPublisher;
+    
     @Override
     public Plan add(Plan plan) {
         plan.setCreateTime(new Date());
         planMapper.insert(plan);
+        PlanDTO planDTO = PlanConverter.toDTO(plan);
+        eventPublisher.publishNewPlanEvent(planDTO);
         return plan;
     }
     

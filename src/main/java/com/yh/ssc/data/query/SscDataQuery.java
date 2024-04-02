@@ -26,7 +26,7 @@ public class SscDataQuery {
     
     private Long cycleId;
     
-    private Long cycleValue;
+    private String cycleValue;
     
     private String result;
     

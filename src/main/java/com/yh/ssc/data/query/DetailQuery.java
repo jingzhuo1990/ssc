@@ -26,5 +26,7 @@ public class DetailQuery {
     private Integer state;
     private Integer amount;
     private BigDecimal profit;
+    private Long cycleId;
+    private String cycleValue;
 
 }

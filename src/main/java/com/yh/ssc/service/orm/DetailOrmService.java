@@ -19,9 +19,19 @@ public interface DetailOrmService extends IService<Detail> {
     default List<Detail> listByCondition(DetailQuery query) {
         QueryWrapper<Detail> queryWrapper = new QueryWrapper<>();
         Long planId = query.getPlanId();
+        Long cycleId = query.getCycleId();
+        String cycleValue = query.getCycleValue();
+        
         if (planId!=null && planId>0){
             queryWrapper.eq("plan_id",planId);
         }
+        if (cycleId!=null && cycleId>0){
+            queryWrapper.eq("cycle_id",cycleId);
+        }
+        if (StringUtils.isNotEmpty(cycleValue)){
+            queryWrapper.eq("cycle_value",cycleValue);
+        }
+        
         return list(queryWrapper);
     }
 }

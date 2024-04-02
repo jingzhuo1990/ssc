@@ -21,8 +21,12 @@ public interface PlanOrmService extends IService<Plan> {
     default List<Plan> listByCondition(PlanQuery query) {
         QueryWrapper<Plan> queryWrapper = new QueryWrapper<>();
         String startCycleValue = query.getStartCycleValue();
+        Long planId = query.getId();
         if (StringUtils.isNotEmpty(query.getStartCycleValue())){
             queryWrapper.eq("start_cycle_value",startCycleValue);
+        }
+        if (planId!=null && planId>0){
+            queryWrapper.eq("id",planId);
         }
         return list(queryWrapper);
     }

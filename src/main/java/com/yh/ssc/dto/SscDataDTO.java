@@ -1,5 +1,6 @@
 package com.yh.ssc.dto;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: mediAsst
@@ -29,17 +31,32 @@ public class SscDataDTO {
     
     private String cycleValue;
     
-    private String result;
-    
-    private Integer wan;
-    
-    private Integer qian;
-    
-    private Integer bai;
-    
-    private Integer shi;
-    
-    private Integer ge;
+    private LastData lastData;
     
     private Date createTime;
+    
+    @Data
+    public static class LastData{
+        
+        private Long lastCycleId;
+        
+        private String lastCycleValue;
+        
+        private String result;
+        
+        private Integer wan;
+        
+        private Integer qian;
+        
+        private Integer bai;
+        
+        private Integer shi;
+        
+        private Integer ge;
+    }
+    
+    public Integer getByIndex(int index) {
+        List<Integer> resultInt = JSONArray.parseArray(getLastData().getResult(),Integer.class);
+        return resultInt.get(index);
+    }
 }

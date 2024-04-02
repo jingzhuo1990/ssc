@@ -85,7 +85,7 @@ public class SscDataRealService implements SscDataService{
     }
     
     @SneakyThrows
-    public void send(Long cycleId,Integer multiple,List<List<String>> data) {
+    public void send(Long cycleId,Integer multiple,List<List<Integer>> data) {
         URL url = new URL(Common.ORDER_SEND_URL);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");

@@ -1,4 +1,4 @@
-package com.yh.ssc.data.dataobject;
+package com.yh.ssc.dto;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -6,36 +6,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * @program: mediAsst
+ * @program: ssc
  * @description:
  * @author: yehang
- * @create: 2024-03-29 10:57
+ * @create: 2024-03-31 15:34
  **/
-
 @Data
-@TableName("ssc_data")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SscData {
+public class DetailDTO {
     
     private Long id;
-    
-    private Long gameId;
-    
-    private Long cycleId;
-    
-    private String cycleValue;
-    
-    private Long lastCycleId;
-    
-    
-    private String lastCycleValue;
-    
-    private String result;
-    
+    private Long planId;
+    private Integer round;
+    private Integer multify;
+    private Integer state;
+    private Integer amount;
+    private BigDecimal profit;
     private Date createTime;
+    private Long cycleId;
+    private String cycleValue;
 }

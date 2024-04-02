@@ -1,25 +1,48 @@
 package com.yh.ssc.enmus;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum IndexEnums {
-    WAN(0,"万位"),
-    QIAN(1,"千位"),
-    BAI(2,"百位"),
-    SHI(3,"十位"),
-    GE(4,"个位");
+    WAN(0,"万位","SINGLE"),
+    QIAN(1,"千位","SINGLE"),
+    BAI(2,"百位","SINGLE"),
+    SHI(3,"十位","SINGLE"),
+    GE(4,"个位","SINGLE");
     
     private Integer index;
-    private String desc;
+    private String subType;
+    private String type;
     
-    IndexEnums(Integer index, String desc) {
+    
+    IndexEnums(Integer index, String subType) {
         this.index = index;
-        this.desc = desc;
+        this.subType = subType;
+    }
+    
+    IndexEnums(Integer index, String subType, String type) {
+        this.index = index;
+        this.subType = subType;
+        this.type = type;
     }
     
     public Integer getIndex() {
         return index;
     }
     
-    public String getDesc() {
-        return desc;
+    public String getSubType() {
+        return subType;
+    }
+    
+    public String getType() {
+        return type;
+    }
+    
+    public static IndexEnums getBySubType(String subType){
+        for (IndexEnums index:IndexEnums.values()) {
+            if (StringUtils.equals(index.subType,subType)){
+                return index;
+            }
+        }
+        throw new RuntimeException("cannot find index enums");
     }
 }

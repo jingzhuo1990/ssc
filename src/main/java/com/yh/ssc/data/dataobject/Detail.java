@@ -25,9 +25,11 @@ public class Detail {
     private Long id;
     private Long planId;
     private Integer round;
+    private Integer multify;
     private Integer state;
     private Integer amount;
     private BigDecimal profit;
     private Date createTime;
-
+    private Long cycleId;
+    private String cycleValue;
 }

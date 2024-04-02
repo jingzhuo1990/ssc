@@ -1,4 +1,4 @@
-package com.yh.ssc.data.dataobject;
+package com.yh.ssc.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -18,11 +18,10 @@ import java.util.List;
  * @create: 2024-03-31 15:30
  **/
 @Data
-@TableName("plan")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Plan {
+public class PlanDTO {
 
     private Long id;
     private Integer round;
@@ -36,6 +35,7 @@ public class Plan {
     private String type;
     private String subType;
     
-    @TableField(exist = false)
+    private JSONObject policyJSON;
+    
     private List<List<Integer>> candidateInner;
 }

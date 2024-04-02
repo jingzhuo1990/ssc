@@ -44,7 +44,7 @@ public class SchedulerService{
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         
         // 指定任务在1秒后开始执行，然后每2秒执行一次
-        executor.scheduleAtFixedRate(saveDataService, 1, 2, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(saveDataService, 1, 10, TimeUnit.SECONDS);
     }
     
     
