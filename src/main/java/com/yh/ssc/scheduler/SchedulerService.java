@@ -1,7 +1,6 @@
 package com.yh.ssc.scheduler;
 
 import com.yh.ssc.service.SaveDataService;
-import jdk.internal.util.EnvUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -40,7 +39,6 @@ public class SchedulerService{
             System.out.println("is local");
             return;
         }
-        System.out.println("not local");
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         
         // 指定任务在1秒后开始执行，然后每2秒执行一次

@@ -1,6 +1,7 @@
 package com.yh.ssc.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.yh.ssc.dto.QueryData;
 import com.yh.ssc.service.orm.SscDataOrmService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import java.util.List;
  **/
 @Component
 @Slf4j
-public class SscDataSimulateService implements SscDataService{
+public class SscSimulateService implements SscService {
     
     @Resource
     private SscDataOrmService sscDataOrmService;
@@ -28,7 +29,10 @@ public class SscDataSimulateService implements SscDataService{
     }
     
     @Override
-    public void send(Long cycleId, Integer multiple, List<List<Integer>> data) {
+    public String send(Long cycleId, Integer multiple, List<List<Integer>> data) {
         log.info("mock send,cycleId:{},multiple:{},data:{}",cycleId,multiple, JSONArray.toJSONString(data));
+        JSONObject mock = new JSONObject();
+        mock.put("data","success");
+        return JSONObject.toJSONString(mock);
     }
 }

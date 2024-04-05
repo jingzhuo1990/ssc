@@ -21,8 +21,12 @@ public class PlanConverter {
         planDTO.setCreateTime(plan.getCreateTime());
         planDTO.setRound(plan.getRound());
         planDTO.setType(plan.getType());
+        planDTO.setSubType(plan.getSubType());
         planDTO.setState(plan.getState());
         planDTO.setCandidateInner(plan.getCandidateInner());
+        planDTO.setSingleCan(plan.getSingleCan());
+        planDTO.setStartCycleId(plan.getStartCycleId());
+        planDTO.setStartCycleValue(plan.getStartCycleValue());
         
         JSONObject policyJSON = JSONObject.parseObject(plan.getPolicy());
         planDTO.setPolicyJSON(policyJSON);
@@ -39,6 +43,8 @@ public class PlanConverter {
         plan.setRound(planDTO.getRound());
         plan.setType(planDTO.getType());
         plan.setState(planDTO.getState());
+        plan.setSubType(planDTO.getSubType());
+        plan.setSingleCan(planDTO.getSingleCan());
         return plan;
     }
 }

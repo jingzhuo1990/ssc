@@ -2,6 +2,7 @@ package com.yh.ssc.event;
 
 import com.yh.ssc.data.dataobject.Plan;
 import com.yh.ssc.dto.PlanDTO;
+import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
 /**

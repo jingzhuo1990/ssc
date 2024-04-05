@@ -1,10 +1,11 @@
 package com.yh.ssc.data.query;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @program: ssc
@@ -22,7 +23,11 @@ public class PlanQuery {
     private Integer round;
     private Integer current;
     private Long startCycleId;
-    private String StartCycleValue;
+    private String startCycleValue;
+    private List<String> cycleValues;
     private String policy;
     private Integer state;
+    private String type;
+    private String subType;
+    private Integer singleCan;
 }

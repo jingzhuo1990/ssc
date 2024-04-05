@@ -1,4 +1,4 @@
-package com.yh.ssc.event.publish;
+package com.yh.ssc.event;
 
 import com.yh.ssc.dto.DetailDTO;
 import com.yh.ssc.dto.PlanDTO;

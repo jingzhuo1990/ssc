@@ -9,7 +9,6 @@ package com.yh.ssc.data.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yh.ssc.data.dataobject.Detail;
-import com.yh.ssc.data.dataobject.SscData;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

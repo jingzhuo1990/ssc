@@ -3,7 +3,7 @@ package com.yh.ssc.strategy;
 import com.google.common.collect.Lists;
 import com.yh.ssc.dto.QueryData;
 import com.yh.ssc.enmus.IndexEnums;
-import com.yh.ssc.service.SscDataService;
+import com.yh.ssc.service.SscService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -24,12 +24,12 @@ public class SingleHotStrategyService implements BaseStrategyService{
     private Integer hisNum=10;
     
     @Resource
-    private SscDataService sscDataRealService;
+    private SscService sscRealService;
     
     
     @Override
     public List<List<String>> recommend(List<QueryData.ResultHis> resultHis) {
-        QueryData queryData = sscDataRealService.query(190,30);
+        QueryData queryData = sscRealService.query(190,30);
         List<String> wanTop5 = topHot(queryData, IndexEnums.WAN.getIndex(),5);
         List<String> qian = Lists.newArrayList();
         List<String> bai = Lists.newArrayList();

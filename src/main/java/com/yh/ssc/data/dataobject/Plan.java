@@ -35,6 +35,7 @@ public class Plan {
     private String candidate;
     private String type;
     private String subType;
+    private Integer singleCan;
     
     @TableField(exist = false)
     private List<List<Integer>> candidateInner;

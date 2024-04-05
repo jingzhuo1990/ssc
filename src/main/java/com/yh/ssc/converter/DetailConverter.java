@@ -22,6 +22,7 @@ public class DetailConverter {
         detailDTO.setState(detail.getState());
         detailDTO.setCycleValue(detail.getCycleValue());
         detailDTO.setPlanId(detail.getPlanId());
+        detailDTO.setMultify(detail.getMultify());
         return detailDTO;
     }
     

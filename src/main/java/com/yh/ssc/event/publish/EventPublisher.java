@@ -4,9 +4,10 @@ import com.yh.ssc.dto.DetailDTO;
 import com.yh.ssc.dto.PlanDTO;
 import com.yh.ssc.dto.SscDataDTO;
 import com.yh.ssc.event.NewCycleEvent;
+import com.yh.ssc.event.NewDetailEvent;
 import com.yh.ssc.event.NewPlanEvent;
-import com.yh.ssc.event.PlanDetailFailedEvent;
-import com.yh.ssc.event.PlanSuccessEvent;
+import com.yh.ssc.event.DetailFailedEvent;
+import com.yh.ssc.event.DetailSuccessEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
@@ -38,12 +39,12 @@ public class EventPublisher implements ApplicationEventPublisherAware {
     }
     
     public void publishPlanSuccess(PlanDTO plan, DetailDTO detail){
-        PlanSuccessEvent successEvent = new PlanSuccessEvent(plan,detail);
+        DetailSuccessEvent successEvent = new DetailSuccessEvent(plan,detail);
         applicationEventPublisher.publishEvent(successEvent);
     }
     
     public void publishDetailFail(SscDataDTO sscDataDTO,PlanDTO plan,DetailDTO detail){
-        PlanDetailFailedEvent failedEvent = new PlanDetailFailedEvent(sscDataDTO,plan,detail);
+        DetailFailedEvent failedEvent = new DetailFailedEvent(sscDataDTO,plan,detail);
         applicationEventPublisher.publishEvent(failedEvent);
     }
     

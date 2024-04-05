@@ -22,6 +22,10 @@ public class SscDataQuery {
     
     private Long id;
     
+    private Long startId;
+    
+    private Long endId;
+    
     private Long gameId;
     
     private Long cycleId;
@@ -30,7 +34,9 @@ public class SscDataQuery {
     
     private String result;
     
-    private Date createTime;
+    private Date startTime;
+    
+    private Date endTime;
     
     private Integer limit;
 }

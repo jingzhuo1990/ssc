@@ -1,5 +1,6 @@
 package com.yh.ssc.data.dataobject;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: mediAsst
@@ -32,10 +34,12 @@ public class SscData {
     
     private Long lastCycleId;
     
-    
     private String lastCycleValue;
     
     private String result;
     
     private Date createTime;
+    
+    @TableField(exist = false)
+    private List<String> lastResult;
 }

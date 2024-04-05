@@ -39,7 +39,7 @@ public enum IndexEnums {
     
     public static IndexEnums getBySubType(String subType){
         for (IndexEnums index:IndexEnums.values()) {
-            if (StringUtils.equals(index.subType,subType)){
+            if (StringUtils.equals(index.getSubType(),subType)){
                 return index;
             }
         }

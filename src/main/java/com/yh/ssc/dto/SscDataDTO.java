@@ -33,6 +33,8 @@ public class SscDataDTO {
     
     private LastData lastData;
     
+    private LastData nowData;
+    
     private Date createTime;
     
     @Data

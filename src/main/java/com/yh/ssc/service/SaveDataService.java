@@ -1,7 +1,6 @@
 package com.yh.ssc.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Preconditions;
 import com.yh.ssc.converter.SscDataConverter;
 import com.yh.ssc.dto.QueryData;
 import com.yh.ssc.data.dataobject.SscData;
@@ -27,7 +26,7 @@ import java.util.Objects;
 public class SaveDataService implements Runnable{
     
     @Resource
-    private SscDataService sscDataRealService;
+    private SscService sscRealService;
     @Resource
     private SscDataOrmService sscDataOrmService;
     
@@ -35,15 +34,16 @@ public class SaveDataService implements Runnable{
     @Override
     public void run() {
         try {
-            QueryData queryData = sscDataRealService.query(190,30);
+            QueryData queryData = sscRealService.query(190,30);
             SscData nowCycle = new SscData();
             if (Objects.isNull(queryData.getLottery_cycle_now().getLast_cycle_game_result())){
                 return;
             }
             nowCycle.setGameId(queryData.getGame_id());
             nowCycle.setCycleId(queryData.getLottery_cycle_now().getNow_cycle_id());
-            nowCycle.setCycleValue(queryData.getLottery_cycle_now().getLast_cycle_value());
+            nowCycle.setCycleValue(queryData.getLottery_cycle_now().getNow_cycle_value());
             nowCycle.setLastCycleValue(queryData.getLottery_cycle_now().getLast_cycle_value());
+            nowCycle.setLastResult(queryData.getLottery_cycle_now().getLast_cycle_game_result());
             
             List<SscDataDTO> sscDatas = sscDataOrmService.listByCondition(SscDataQuery.builder().cycleId(nowCycle.getCycleId()).build());
             if (CollectionUtils.isNotEmpty(sscDatas)){
@@ -51,7 +51,9 @@ public class SaveDataService implements Runnable{
             }else {
                 String lastRst = JSONObject.toJSONString(queryData.getLottery_cycle_now().getLast_cycle_game_result());
                 SscData lastSscData = updateLastCycle(queryData.getLottery_cycle_now().getLast_cycle_value(),lastRst);
-                nowCycle.setLastCycleId(lastSscData.getCycleId());
+                if (lastSscData!=null){
+                    nowCycle.setLastCycleId(lastSscData.getCycleId());
+                }
                 sscDataOrmService.add(nowCycle);
             }
         }catch (Throwable e) {
@@ -61,7 +63,9 @@ public class SaveDataService implements Runnable{
     
     private SscData updateLastCycle(String lastCycleValue,String result){
         List<SscDataDTO> sscDataDTOS = sscDataOrmService.listByCondition(SscDataQuery.builder().cycleValue(lastCycleValue).build());
-        Preconditions.checkArgument(CollectionUtils.isNotEmpty(sscDataDTOS),"查找不到上一轮数据 "+lastCycleValue);
+        if (CollectionUtils.isEmpty(sscDataDTOS)){
+            return null;
+        }
         SscDataDTO sscDataDTO = sscDataDTOS.get(0);
         sscDataDTO.getLastData().setResult(result);
         SscData sscData = SscDataConverter.toDO(sscDataDTO);

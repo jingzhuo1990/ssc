@@ -2,6 +2,7 @@ package com.yh.ssc.event;
 
 import com.yh.ssc.data.dataobject.SscData;
 import com.yh.ssc.dto.SscDataDTO;
+import lombok.ToString;
 import org.springframework.context.ApplicationEvent;
 
 /**

@@ -3,6 +3,7 @@ package com.yh.ssc.converter;
 import com.alibaba.fastjson.JSONArray;
 import com.yh.ssc.data.dataobject.SscData;
 import com.yh.ssc.dto.SscDataDTO;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 
@@ -16,19 +17,34 @@ public class SscDataConverter {
         sscDataDTO.setCycleId(sscData.getCycleId());
         sscDataDTO.setCycleValue(sscData.getCycleValue());
         
+        SscDataDTO.LastData nowData = new SscDataDTO.LastData();
+        sscDataDTO.setNowData(nowData);
+        nowData.setResult(JSONArray.toJSONString(sscData.getResult()));
+        List<String> nowResults = JSONArray.parseArray(sscData.getResult(),String.class);
+        if (CollectionUtils.isNotEmpty(nowResults)){
+            nowData.setWan(Integer.valueOf(nowResults.get(0)));
+            nowData.setQian(Integer.valueOf(nowResults.get(1)));
+            nowData.setBai(Integer.valueOf(nowResults.get(2)));
+            nowData.setShi(Integer.valueOf(nowResults.get(3)));
+            nowData.setGe(Integer.valueOf(nowResults.get(4)));
+        }
+        
         SscDataDTO.LastData lastData = new SscDataDTO.LastData();
         sscDataDTO.setLastData(lastData);
         
         lastData.setLastCycleValue(sscData.getLastCycleValue());
         lastData.setLastCycleId(sscData.getLastCycleId());
-        lastData.setResult(sscData.getResult());
+        lastData.setResult(JSONArray.toJSONString(sscData.getLastResult()));
         
-        List<String> results = JSONArray.parseArray(sscData.getResult(),String.class);
-        lastData.setWan(Integer.valueOf(results.get(0)));
-        lastData.setQian(Integer.valueOf(results.get(1)));
-        lastData.setBai(Integer.valueOf(results.get(2)));
-        lastData.setShi(Integer.valueOf(results.get(3)));
-        lastData.setGe(Integer.valueOf(results.get(4)));
+        List<String> results = sscData.getLastResult();
+        if (CollectionUtils.isNotEmpty(results)){
+            lastData.setWan(Integer.valueOf(results.get(0)));
+            lastData.setQian(Integer.valueOf(results.get(1)));
+            lastData.setBai(Integer.valueOf(results.get(2)));
+            lastData.setShi(Integer.valueOf(results.get(3)));
+            lastData.setGe(Integer.valueOf(results.get(4)));
+        }
+        
         return sscDataDTO;
     }
     

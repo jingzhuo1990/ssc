@@ -6,6 +6,7 @@ import com.yh.ssc.data.dataobject.SscData;
 import com.yh.ssc.data.mapper.SscDataMapper;
 import com.yh.ssc.dto.SscDataDTO;
 import com.yh.ssc.event.publish.EventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -18,6 +19,7 @@ import java.util.Date;
  * @create: 2024-03-29 11:22
  **/
 @Repository
+@Slf4j
 public class SscDataOrmServiceImpl extends ServiceImpl<SscDataMapper, SscData> implements SscDataOrmService {
     
     @Resource
@@ -35,8 +37,8 @@ public class SscDataOrmServiceImpl extends ServiceImpl<SscDataMapper, SscData> i
             eventPublisher.publishCycleEvent(sscDataDTO);
             return sscData;
         }catch (Exception e){
-            log.error("error inserting sscdata,e:{}",e);
-            throw new RuntimeException("error inserting sscdata");
+            log.error("error inserting sscdata,sscData:{}",sscData);
+            throw new RuntimeException(e);
         }
     }
 }

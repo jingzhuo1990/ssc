@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.yh.ssc.annotation.SafeEventListener;
+import com.yh.ssc.constants.Common;
 import com.yh.ssc.converter.DetailConverter;
 import com.yh.ssc.converter.PlanConverter;
 import com.yh.ssc.converter.SscDataConverter;
@@ -23,15 +25,19 @@ import com.yh.ssc.enmus.IndexEnums;
 import com.yh.ssc.enmus.PlanStateEnums;
 import com.yh.ssc.event.NewCycleEvent;
 import com.yh.ssc.event.publish.EventPublisher;
+import com.yh.ssc.profit.Profit;
+import com.yh.ssc.profit.ProfitProperties;
 import com.yh.ssc.service.DataFactoryService;
 import com.yh.ssc.service.orm.DetailOrmService;
 import com.yh.ssc.service.orm.PlanOrmService;
 import com.yh.ssc.utils.StreamUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +49,7 @@ import java.util.stream.Collectors;
  * @create: 2024-03-31 13:00
  **/
 @Service
+@Slf4j
 public class NewCyclelistener {
     
     @Resource
@@ -53,50 +60,61 @@ public class NewCyclelistener {
     private DetailOrmService detailOrmService;
     @Resource
     private EventPublisher eventPublisher;
+    @Resource
+    private ProfitProperties profitProperties;
     
     
     @EventListener(value = NewCycleEvent.class)
     public void plan(NewCycleEvent newCycleEvent) {
-        SscDataDTO sscDataDTO = (SscDataDTO) newCycleEvent.getSource();
-        List<DetailDTO> existDetails = existPlanDetail(sscDataDTO);
-        if (CollectionUtils.isNotEmpty(existDetails)){
-            existDetails.forEach(existDetail->{
-                handlerPlanDetail(sscDataDTO,existDetail);
-            });
-        }else {
+        try {
+            log.warn("new newCycleEvent:{}",newCycleEvent);
+            SscDataDTO sscDataDTO = (SscDataDTO) newCycleEvent.getSource();
+            Long lastCycleId = sscDataDTO.getLastData().getLastCycleId();
+            if (lastCycleId==null){
+                log.warn("lastCycleId is null ,return,:{}",sscDataDTO);
+            }
+            List<DetailDTO> existDetails = existPlanDetail(sscDataDTO);
+            if (CollectionUtils.isNotEmpty(existDetails)){
+                existDetails.forEach(existDetail->{
+                    handlerPlanDetail(sscDataDTO,existDetail);
+                });
+            }
             addNewPlan(sscDataDTO);
+        }catch (Exception e){
+            log.error("NewCycleEvent plan handler error,:{}",e);
         }
+        
     }
     
     private void addNewPlan(SscDataDTO sscDataDTO){
-        DataContext dataContext = dataFactoryService.buildDataContext(30);
+        DataContext dataContext = dataFactoryService.buildDataContext(58);
         List<DataContext.SinglePercent> singlePercents = dataContext.getSinglePercents();
         
-        boolean newPlan = false;
-        
-        List<List<Integer>> canditate = Lists.newArrayList();
+        //每一位都需要单独看
         for (DataContext.SinglePercent singlePercent:singlePercents){
             IndexEnums indexEnums = singlePercent.getIndexEnums();
             List<Integer> candidateNum = singlePercent.getDistributeds().stream().filter(x->x.getCnt()==0).map(
                     DataContext.Distributed::getNum).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(candidateNum)){
-                newPlan = true;
-            }
-            canditate.add(indexEnums.getIndex(),candidateNum);
-            if (newPlan){
+            
+            //需要拆分开，单独计划
+            for (Integer candi:candidateNum){
+                List<List<Integer>> canditate = new ArrayList<>();
+                for (int i=0;i<4;i++){
+                    canditate.add(i, new ArrayList<>());
+                }
+                canditate.add(indexEnums.getIndex(),Lists.newArrayList(candi));
                 doAddNewPlan(sscDataDTO.getCycleId(),sscDataDTO.getCycleValue(),canditate,indexEnums);
             }
         }
     }
     
     private List<DetailDTO> existPlanDetail(SscDataDTO sscDataDTO){
-        Long cycleId =sscDataDTO.getLastData().getLastCycleId();
         String cycleValue =sscDataDTO.getLastData().getLastCycleValue();
         List<Detail> details = detailOrmService.listByCondition(DetailQuery.builder()
                 .cycleValue(cycleValue)
                 .state(DetailStateEnums.SEND_OK.getState())
                 .build());
-        
+//        log.info("exist details,num:{},sscData:{}",details.size(),sscDataDTO);
         return StreamUtils.ofNullable(details).map(DetailConverter::toDTO).collect(Collectors.toList());
     }
     
@@ -118,33 +136,49 @@ public class NewCyclelistener {
         }
     }
     
-    private void doAddNewPlan(Long startCycleId,String startCycleValue,List<List<Integer>> candidate,IndexEnums indexEnums){
+    private boolean exitsPlan(IndexEnums indexEnums,Integer singleCan,String startCycleValue){
+        List<String> cycleValues = new ArrayList<>();
+        for (int i= 1 ; i< Common.LAST_HIS;i++){
+            Long temp = Long.valueOf(startCycleValue)-i;
+            cycleValues.add(String.valueOf(temp));
+        }
+        List<Plan> explans = planOrmService.listByCondition(PlanQuery.builder().subType(indexEnums.getSubType()).cycleValues(cycleValues).singleCan(singleCan).build());
+        if (CollectionUtils.isNotEmpty(explans)){
+            return true;
+        }
+        return false;
+    }
+    
+    private void doAddNewPlan(Long startCycleId,String startCycleValue,List<List<Integer>> candidates,IndexEnums indexEnums){
+        Integer singleCan = candidates.get(indexEnums.getIndex()).get(0);
+        
+        if (exitsPlan(indexEnums,singleCan,startCycleValue)){
+            log.info("existed plan");
+            return;
+        }
         Plan plan = new Plan();
         plan.setCreateTime(new Date());
-        plan.setRound(10);
+        plan.setRound(profitProperties.getProfits().size());
         plan.setCurrent(0);
         plan.setStartCycleId(startCycleId);
         plan.setStartCycleValue(startCycleValue);
         plan.setState(PlanStateEnums.RUNNING.getState());
-        plan.setCandidate(JSONArray.toJSONString(candidate));
-        plan.setCandidateInner(candidate);
+        plan.setCandidate(JSONArray.toJSONString(candidates));
+        plan.setCandidateInner(candidates);
         
         plan.setType(indexEnums.getType());
         plan.setSubType(indexEnums.getSubType());
+        plan.setSingleCan(singleCan);
         
+        List<Profit> profits = profitProperties.getProfits();
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("1","1");
-        jsonObject.put("2","1");
-        jsonObject.put("3","1");
-        jsonObject.put("4","1");
-        jsonObject.put("5","2");
-        jsonObject.put("6","2");
-        jsonObject.put("7","2");
-        jsonObject.put("9","2");
-        jsonObject.put("9","2");
-        jsonObject.put("10","4");
+        for (Profit profit : profits) {
+            jsonObject.put(String.valueOf(profit.getRound()),profit.getMultify());
+        }
         
         plan.setPolicy(jsonObject.toJSONString());
+        log.info("new plan,plan:{}",plan);
+        
         planOrmService.add(plan);
     }
 }

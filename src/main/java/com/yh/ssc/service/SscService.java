@@ -4,9 +4,9 @@ import com.yh.ssc.dto.QueryData;
 
 import java.util.List;
 
-public interface SscDataService {
+public interface SscService {
     
     QueryData query(Integer gameId,Integer rowCnt);
     
-    void send(Long cycleId,Integer multiple,List<List<Integer>> data);
+    String send(Long cycleId,Integer multiple,List<List<Integer>> data);
 }

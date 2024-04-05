@@ -3,13 +3,16 @@ package com.yh.ssc.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.yh.ssc.conf.PlatformConfig;
 import com.yh.ssc.constants.Common;
 import com.yh.ssc.dto.Input;
 import com.yh.ssc.dto.QueryData;
 import com.yh.ssc.dto.Var;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -20,7 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class SscDataRealService implements SscDataService{
+@Slf4j
+public class SscRealService implements SscService {
+    
+    @Resource
+    private PlatformConfig platformConfig;
     
     @SneakyThrows
     public QueryData query(Integer gameId,Integer rowCnt) {
@@ -28,7 +35,8 @@ public class SscDataRealService implements SscDataService{
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         
-        con.setRequestProperty("Authorization","ntRbQT4vsgMnQ5dMWu5ORIlunwctDbMjPbqEPU-7U-c=.eyJ1Ijo3OTEzMywiYSI6MjgxNDY3MzUsInQiOiJiNDZkMGFiMTM5ZDc1YjA1IiwiayI6MX0=");
+        //ntRbQT4vsgMnQ5dMWu5ORIlunwctDbMjPbqEPU-7U-c=.eyJ1Ijo3OTEzMywiYSI6MjgxNDY3MzUsInQiOiJiNDZkMGFiMTM5ZDc1YjA1IiwiayI6MX0=
+        con.setRequestProperty("Authorization",platformConfig.getAuth());
         con.setRequestProperty("Connection","keep-alive");
         con.setRequestProperty("Sec-Fetch-Dest","empty");
         con.setRequestProperty("Sec-Fetch-Mode","cors");
@@ -85,12 +93,12 @@ public class SscDataRealService implements SscDataService{
     }
     
     @SneakyThrows
-    public void send(Long cycleId,Integer multiple,List<List<Integer>> data) {
+    public String send(Long cycleId,Integer multiple,List<List<Integer>> data) {
         URL url = new URL(Common.ORDER_SEND_URL);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
 
-        con.setRequestProperty("Authorization","ntRbQT4vsgMnQ5dMWu5ORIlunwctDbMjPbqEPU-7U-c=.eyJ1Ijo3OTEzMywiYSI6MjgxNDY3MzUsInQiOiJiNDZkMGFiMTM5ZDc1YjA1IiwiayI6MX0=");
+        con.setRequestProperty("Authorization",platformConfig.getAuth());
         con.setRequestProperty("Connection","keep-alive");
         con.setRequestProperty("Sec-Fetch-Dest","empty");
         con.setRequestProperty("Sec-Fetch-Mode","cors");
@@ -138,12 +146,12 @@ public class SscDataRealService implements SscDataService{
 
         in.close();;
 
-        System.out.println(response.toString());
-
+        log.info("send result:{}",response.toString());
+        return response.toString();
     }
 
     public static void main(String[] args) {
-        SscDataRealService sscDataRealService = new SscDataRealService();
+        SscRealService sscDataRealService = new SscRealService();
         List<String> wan = Lists.newArrayList("1","2","3","4","5","6","7","8");
         List<String> qian = Lists.newArrayList();
         List<String> bai = Lists.newArrayList();
@@ -155,10 +163,25 @@ public class SscDataRealService implements SscDataService{
         all.add(bai);
         all.add(shi);
         all.add(ge);
-//        sscMsgService.send(24335799L,1,all);
         
-        QueryData queryData = sscDataRealService.query(190,10);
-        System.out.println(JSONObject.toJSONString(queryData));
+        List<List<Integer>> inte = Lists.newArrayList();
+        List<Integer> wanIn = Lists.newArrayList(1,2,3,4,5,6,7,8,9);
+        inte.add(wanIn);
+        List<Integer> qianIn = Lists.newArrayList();
+        List<Integer> baiIn = Lists.newArrayList();
+        List<Integer> shiIn = Lists.newArrayList();
+        List<Integer> geIn = Lists.newArrayList();
+        inte.add(qianIn);
+        inte.add(baiIn);
+        inte.add(shiIn);
+        inte.add(geIn);
+        
+        System.out.println(JSONArray.toJSONString(inte));
+        
+//        sscDataRealService.send(24530767L,1,inte);
+        
+//        QueryData queryData = sscDataRealService.query(190,10);
+//        System.out.println(JSONObject.toJSONString(queryData));
     }
 
 }
