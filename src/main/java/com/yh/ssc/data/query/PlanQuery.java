@@ -20,6 +20,7 @@ import java.util.List;
 public class PlanQuery {
 
     private Long id;
+    private Long gameId;
     private Integer round;
     private Integer current;
     private Long startCycleId;

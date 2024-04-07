@@ -23,9 +23,9 @@ public class SchedulerService{
     
     @Resource
     private SaveDataService saveDataService;
-    
     @Resource
     private Environment environment;
+    
     
     @EventListener(ApplicationReadyEvent.class)
     public void execute(){
@@ -35,10 +35,10 @@ public class SchedulerService{
         // 检查是否 "local" profile 激活
         boolean isLocalActive = Arrays.asList(activeProfiles).contains("local");
         
-        if (isLocalActive){
+        /*if (isLocalActive){
             System.out.println("is local");
             return;
-        }
+        }*/
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         
         // 指定任务在1秒后开始执行，然后每2秒执行一次

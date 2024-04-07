@@ -2,6 +2,7 @@ package com.yh.ssc.dto;
 
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yh.ssc.enmus.FeatureEnums;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,8 @@ public class SscDataDTO {
     private Long id;
     
     private Long gameId;
+    
+    private Integer row;
     
     private Long cycleId;
     
@@ -55,6 +58,11 @@ public class SscDataDTO {
         private Integer shi;
         
         private Integer ge;
+        
+        private FeatureEnums front3;
+        private FeatureEnums mid3;
+        private FeatureEnums last3;
+        
     }
     
     public Integer getByIndex(int index) {

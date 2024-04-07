@@ -6,17 +6,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.yh.ssc.annotation.SafeEventListener;
+import com.yh.ssc.conf.GameProperteries;
 import com.yh.ssc.constants.Common;
 import com.yh.ssc.converter.DetailConverter;
 import com.yh.ssc.converter.PlanConverter;
-import com.yh.ssc.converter.SscDataConverter;
 import com.yh.ssc.data.dataobject.Detail;
 import com.yh.ssc.data.dataobject.Plan;
 import com.yh.ssc.data.query.DetailQuery;
 import com.yh.ssc.data.query.PlanQuery;
 import com.yh.ssc.dto.DataContext;
-import com.yh.ssc.data.dataobject.SscData;
 import com.yh.ssc.dto.DetailDTO;
 import com.yh.ssc.dto.PlanDTO;
 import com.yh.ssc.dto.SscDataDTO;
@@ -62,6 +60,8 @@ public class NewCyclelistener {
     private EventPublisher eventPublisher;
     @Resource
     private ProfitProperties profitProperties;
+    @Resource
+    private GameProperteries gameProperteries;
     
     
     @EventListener(value = NewCycleEvent.class)
@@ -69,6 +69,11 @@ public class NewCyclelistener {
         try {
             log.warn("new newCycleEvent:{}",newCycleEvent);
             SscDataDTO sscDataDTO = (SscDataDTO) newCycleEvent.getSource();
+            if (!gameProperteries.allowPlan(sscDataDTO.getGameId().intValue())){
+                log.warn("game :{} not to plan and direct return",sscDataDTO.getGameId());
+                return;
+            }
+            log.info("try to plan,gameId:{}",sscDataDTO.getGameId());
             Long lastCycleId = sscDataDTO.getLastData().getLastCycleId();
             if (lastCycleId==null){
                 log.warn("lastCycleId is null ,return,:{}",sscDataDTO);
@@ -87,7 +92,7 @@ public class NewCyclelistener {
     }
     
     private void addNewPlan(SscDataDTO sscDataDTO){
-        DataContext dataContext = dataFactoryService.buildDataContext(58);
+        DataContext dataContext = dataFactoryService.buildDataContext(Math.toIntExact(sscDataDTO.getGameId()),sscDataDTO.getRow());
         List<DataContext.SinglePercent> singlePercents = dataContext.getSinglePercents();
         
         //每一位都需要单独看
@@ -103,7 +108,7 @@ public class NewCyclelistener {
                     canditate.add(i, new ArrayList<>());
                 }
                 canditate.add(indexEnums.getIndex(),Lists.newArrayList(candi));
-                doAddNewPlan(sscDataDTO.getCycleId(),sscDataDTO.getCycleValue(),canditate,indexEnums);
+                doAddNewPlan(sscDataDTO.getGameId(),sscDataDTO.getCycleId(),sscDataDTO.getCycleValue(),canditate,indexEnums);
             }
         }
     }
@@ -111,10 +116,10 @@ public class NewCyclelistener {
     private List<DetailDTO> existPlanDetail(SscDataDTO sscDataDTO){
         String cycleValue =sscDataDTO.getLastData().getLastCycleValue();
         List<Detail> details = detailOrmService.listByCondition(DetailQuery.builder()
+                .gameId(sscDataDTO.getGameId())
                 .cycleValue(cycleValue)
                 .state(DetailStateEnums.SEND_OK.getState())
                 .build());
-//        log.info("exist details,num:{},sscData:{}",details.size(),sscDataDTO);
         return StreamUtils.ofNullable(details).map(DetailConverter::toDTO).collect(Collectors.toList());
     }
     
@@ -136,27 +141,28 @@ public class NewCyclelistener {
         }
     }
     
-    private boolean exitsPlan(IndexEnums indexEnums,Integer singleCan,String startCycleValue){
+    private boolean exitsPlan(Long gameId,IndexEnums indexEnums,Integer singleCan,String startCycleValue){
         List<String> cycleValues = new ArrayList<>();
         for (int i= 1 ; i< Common.LAST_HIS;i++){
             Long temp = Long.valueOf(startCycleValue)-i;
             cycleValues.add(String.valueOf(temp));
         }
-        List<Plan> explans = planOrmService.listByCondition(PlanQuery.builder().subType(indexEnums.getSubType()).cycleValues(cycleValues).singleCan(singleCan).build());
+        List<Plan> explans = planOrmService.listByCondition(PlanQuery.builder().gameId(gameId).subType(indexEnums.getSubType()).cycleValues(cycleValues).singleCan(singleCan).build());
         if (CollectionUtils.isNotEmpty(explans)){
             return true;
         }
         return false;
     }
     
-    private void doAddNewPlan(Long startCycleId,String startCycleValue,List<List<Integer>> candidates,IndexEnums indexEnums){
+    private void doAddNewPlan(Long gameId,Long startCycleId,String startCycleValue,List<List<Integer>> candidates,IndexEnums indexEnums){
         Integer singleCan = candidates.get(indexEnums.getIndex()).get(0);
         
-        if (exitsPlan(indexEnums,singleCan,startCycleValue)){
+        if (exitsPlan(gameId,indexEnums,singleCan,startCycleValue)){
             log.info("existed plan");
             return;
         }
         Plan plan = new Plan();
+        plan.setGameId(gameId);
         plan.setCreateTime(new Date());
         plan.setRound(profitProperties.getProfits().size());
         plan.setCurrent(0);

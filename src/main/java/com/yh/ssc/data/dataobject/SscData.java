@@ -42,4 +42,7 @@ public class SscData {
     
     @TableField(exist = false)
     private List<String> lastResult;
+    
+    @TableField(exist = false)
+    private Integer row;
 }

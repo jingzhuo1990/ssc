@@ -1,5 +1,6 @@
 package com.yh.ssc.service.result;
 
+import com.yh.ssc.enmus.FeatureEnums;
 import com.yh.ssc.enmus.IndexEnums;
 
 import java.util.List;
@@ -14,5 +15,7 @@ public interface SscDataResultService {
     Map<String, Map<Integer,List<Integer>>> distribution(Integer gameId,Integer cnt,Long startId,Long endId);
     
     
-    void baozi(Integer gameId,Long startId,Long endId);
+    Map<Integer,Map<FeatureEnums,List<Integer>>> baozi(Integer gameId,Integer cnt,Long startId,Long endId);
+    
+    Map<Boolean,List<Integer>> hasBaozi(Integer gameId,Integer cnt,Long startId,Long endId);
 }

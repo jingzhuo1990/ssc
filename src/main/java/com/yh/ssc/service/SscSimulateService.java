@@ -29,7 +29,7 @@ public class SscSimulateService implements SscService {
     }
     
     @Override
-    public String send(Long cycleId, Integer multiple, List<List<Integer>> data) {
+    public String send(Long gameId,Long cycleId, Integer multiple, List<List<Integer>> data) {
         log.info("mock send,cycleId:{},multiple:{},data:{}",cycleId,multiple, JSONArray.toJSONString(data));
         JSONObject mock = new JSONObject();
         mock.put("data","success");

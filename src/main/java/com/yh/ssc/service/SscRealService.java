@@ -3,6 +3,7 @@ package com.yh.ssc.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.yh.ssc.conf.GameProperteries;
 import com.yh.ssc.conf.PlatformConfig;
 import com.yh.ssc.constants.Common;
 import com.yh.ssc.dto.Input;
@@ -28,6 +29,8 @@ public class SscRealService implements SscService {
     
     @Resource
     private PlatformConfig platformConfig;
+    @Resource
+    private GameProperteries gameProperteries;
     
     @SneakyThrows
     public QueryData query(Integer gameId,Integer rowCnt) {
@@ -93,7 +96,9 @@ public class SscRealService implements SscService {
     }
     
     @SneakyThrows
-    public String send(Long cycleId,Integer multiple,List<List<Integer>> data) {
+    public String send(Long gameId,Long cycleId,Integer multiple,List<List<Integer>> data) {
+        //根据基准倍数，计算实际的
+        multiple = gameProperteries.calMultify(Math.toIntExact(gameId),multiple);
         URL url = new URL(Common.ORDER_SEND_URL);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
@@ -119,6 +124,7 @@ public class SscRealService implements SscService {
 
 
         Input input = new Input();
+        input.setGame_id(Math.toIntExact(gameId));
         input.setGame_cycle_id(cycleId);
         input.setBet_multiple(multiple);
         input.setBet_info(JSONArray.toJSONString(data));

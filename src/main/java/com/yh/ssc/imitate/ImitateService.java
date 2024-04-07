@@ -32,10 +32,10 @@ public class ImitateService {
     
     private static AtomicInteger totalPlan = new AtomicInteger(0);
     
-    public double imitate(Integer cnt,Long startId,Long endId){
+    public double imitate(Integer gameId,Integer cnt,Long startId,Long endId){
         mostCost.set(0);
         totalPlan.set(0);
-        Map<String, Map<Integer, List<Integer>>> distribute = sscDataResultService.distribution(Common.TX_QI_QU_FENFEN,cnt,startId,endId);
+        Map<String, Map<Integer, List<Integer>>> distribute = sscDataResultService.distribution(gameId,cnt,startId,endId);
         
         double allProfit = 0;
         

@@ -56,7 +56,7 @@ public class NewDetailListener {
             Plan plan = plans.get(0);
             String candidate = plan.getCandidate();
             List<List<Integer>> candidateInner = JSON.parseObject(candidate, new TypeReference<List<List<Integer>>>() {});
-            String sendRst = sscRealService.send(detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            String sendRst = sscRealService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
             JSONObject sendJSON = JSONObject.parseObject(sendRst);
             if (sendJSON.containsKey("errors")){
                 log.info("send failed:{}",sendRst);
@@ -117,12 +117,12 @@ public class NewDetailListener {
                 planOrmService.update(plan);
             } else {
                 Detail newDetail = buildNewDetail(detailDTO, planDTO, currentCycleId, currentCycleValue);
+                log.info("new detail:{}",newDetail);
                 detailOrmService.add(newDetail);
             }
         }catch (Exception e) {
             log.error("Plan detailed planFailed handler failed,{}",e);
         }
-        
         
     }
     
@@ -136,6 +136,7 @@ public class NewDetailListener {
         Detail newDetail = new Detail();
         newDetail.setState(DetailStateEnums.RUNNING.getState());
         newDetail.setPlanId(planDTO.getId());
+        newDetail.setGameId(oldDetail.getGameId());
         
         Integer multify = planDTO.getPolicyJSON().getInteger(String.valueOf(round));
         Integer amount = multify * Common.SINGLE_AMOUNT;

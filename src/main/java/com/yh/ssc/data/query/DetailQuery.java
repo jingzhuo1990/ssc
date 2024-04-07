@@ -22,6 +22,7 @@ public class DetailQuery {
     
     private Long id;
     private Long planId;
+    private Long gameId;
     private Integer round;
     private Integer state;
     private Integer amount;

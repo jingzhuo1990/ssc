@@ -27,6 +27,7 @@ public class PlanConverter {
         planDTO.setSingleCan(plan.getSingleCan());
         planDTO.setStartCycleId(plan.getStartCycleId());
         planDTO.setStartCycleValue(plan.getStartCycleValue());
+        planDTO.setGameId(plan.getGameId());
         
         JSONObject policyJSON = JSONObject.parseObject(plan.getPolicy());
         planDTO.setPolicyJSON(policyJSON);
@@ -45,6 +46,7 @@ public class PlanConverter {
         plan.setState(planDTO.getState());
         plan.setSubType(planDTO.getSubType());
         plan.setSingleCan(planDTO.getSingleCan());
+        plan.setGameId(planDTO.getGameId());
         return plan;
     }
 }

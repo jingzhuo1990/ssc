@@ -22,6 +22,7 @@ import java.util.Date;
 public class DetailDTO {
     
     private Long id;
+    private Long gameId;
     private Long planId;
     private Integer round;
     private Integer multify;

@@ -3,6 +3,7 @@ package com.yh.ssc.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yh.ssc.enmus.FeatureEnums;
 import com.yh.ssc.imitate.ImitateService;
 import com.yh.ssc.profit.ProfitProperties;
 import com.yh.ssc.profit.ProfitService;
@@ -64,7 +65,7 @@ public class TestController {
     
     @GetMapping("single/{row}")
     public DataContext single(@PathVariable Integer row){
-        return dataFactoryService.buildDataContext(row);
+        return dataFactoryService.buildDataContext(190,row);
     }
     
     @GetMapping("/profit")
@@ -94,13 +95,27 @@ public class TestController {
         return null;
     }
     
-    @GetMapping("imitate/{cnt}/{startId}/{endId}")
-    public Map<Integer, Double> imitate(@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
+    @GetMapping("imitate/{gameId}/{cnt}/{startId}/{endId}")
+    public Map<Integer, Double> imitate(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
         Map<Integer, Double> map = new HashMap<>();
         for (int cntIndex = cnt; cntIndex <= 80; cntIndex++) {
-            Double profit = imitateService.imitate(cntIndex,startId,endId);
+            Double profit = imitateService.imitate(gameId,cntIndex,startId,endId);
             map.put(cntIndex, profit);
         }
         return map;
     }
+    
+    @GetMapping("baozi/{cnt}/{startId}/{endId}")
+    public String imitateBaozi(@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
+        Map<Integer,Map<FeatureEnums,List<Integer>>> baozi = sscDataResultService.baozi(Common.TX_QI_QU_FENFEN,cnt,startId,endId);
+        return JSONArray.toJSONString(baozi);
+    }
+    
+    
+    @GetMapping("hasbaozi/{cnt}/{startId}/{endId}")
+    public String imitateHasBaozi(@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
+        Map<Boolean,List<Integer>> baozi = sscDataResultService.hasBaozi(Common.TX_QI_QU_FENFEN,cnt,startId,endId);
+        return JSONArray.toJSONString(baozi);
+    }
+    
 }

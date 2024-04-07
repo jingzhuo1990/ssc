@@ -23,6 +23,7 @@ public class DetailConverter {
         detailDTO.setCycleValue(detail.getCycleValue());
         detailDTO.setPlanId(detail.getPlanId());
         detailDTO.setMultify(detail.getMultify());
+        detailDTO.setGameId(detail.getGameId());
         return detailDTO;
     }
     
@@ -37,6 +38,7 @@ public class DetailConverter {
         detail.setState(detailDTO.getState());
         detail.setCycleValue(detailDTO.getCycleValue());
         detail.setPlanId(detailDTO.getPlanId());
+        detail.setGameId(detailDTO.getGameId());
         return detail;
     }
 }

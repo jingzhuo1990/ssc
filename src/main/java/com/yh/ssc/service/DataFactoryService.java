@@ -27,9 +27,9 @@ public class DataFactoryService {
     @Resource
     private SscService sscRealService;
     
-    public DataContext buildDataContext(Integer row){
+    public DataContext buildDataContext(Integer gameId,Integer row){
         DataContext dataContext = new DataContext();
-        QueryData queryData = sscRealService.query(Common.TX_QI_QU_FENFEN,row);
+        QueryData queryData = sscRealService.query(gameId,row);
         
         List<DataContext.SinglePercent> singlePercents = Lists.newArrayList();
         for (IndexEnums indexEnums : IndexEnums.values()){

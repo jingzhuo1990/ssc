@@ -23,6 +23,7 @@ import java.util.Date;
 public class Detail {
     
     private Long id;
+    private Long gameId;
     private Long planId;
     private Integer round;
     private Integer multify;

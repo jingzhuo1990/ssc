@@ -40,6 +40,7 @@ public class NewPlanListener {
             detail.setPlanId(planDTO.getId());
             String policy = planDTO.getPolicy();
             
+            detail.setGameId(planDTO.getGameId());
             detail.setCreateTime(new Date());
             Integer round = 1;
             detail.setRound(round);

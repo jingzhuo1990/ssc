@@ -21,6 +21,7 @@ public interface DetailOrmService extends IService<Detail> {
         Long planId = query.getPlanId();
         Long cycleId = query.getCycleId();
         String cycleValue = query.getCycleValue();
+        Long gameId = query.getGameId();
         
         if (planId!=null && planId>0){
             queryWrapper.eq("plan_id",planId);
@@ -30,6 +31,9 @@ public interface DetailOrmService extends IService<Detail> {
         }
         if (StringUtils.isNotEmpty(cycleValue)){
             queryWrapper.eq("cycle_value",cycleValue);
+        }
+        if (gameId!=null && gameId>0){
+            queryWrapper.eq("game_id",gameId);
         }
         
         return list(queryWrapper);
