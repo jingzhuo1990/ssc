@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yh.ssc.enmus.FeatureEnums;
+import com.yh.ssc.enmus.SingleFeature;
 import com.yh.ssc.imitate.ImitateService;
+import com.yh.ssc.profit.CalProfit;
 import com.yh.ssc.profit.ProfitProperties;
 import com.yh.ssc.profit.ProfitService;
 import com.yh.ssc.profit.Profit;
@@ -50,6 +52,8 @@ public class TestController {
     private SscDataResultService sscDataResultService;
     @Resource
     private ImitateService imitateService;
+    @Resource
+    private CalProfit calProfit;
     
     @GetMapping("/test")
     public String testRecommend(){
@@ -66,6 +70,11 @@ public class TestController {
     @GetMapping("single/{row}")
     public DataContext single(@PathVariable Integer row){
         return dataFactoryService.buildDataContext(190,row);
+    }
+    
+    @GetMapping("/cal/profit/{round}")
+    public List<Profit> calProfit(@PathVariable Integer round){
+        return calProfit.getProfits(round);
     }
     
     @GetMapping("/profit")
@@ -98,12 +107,28 @@ public class TestController {
     @GetMapping("imitate/{gameId}/{cnt}/{startId}/{endId}")
     public Map<Integer, Double> imitate(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
         Map<Integer, Double> map = new HashMap<>();
-        for (int cntIndex = cnt; cntIndex <= 80; cntIndex++) {
+        for (int cntIndex = cnt; cntIndex <= 110; cntIndex++) {
             Double profit = imitateService.imitate(gameId,cntIndex,startId,endId);
             map.put(cntIndex, profit);
         }
         return map;
     }
+    
+    @GetMapping("lastsum/{gameId}/{cnt}/{startId}/{endId}/{start}/{end}")
+    public List<Integer> Last2Dis(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId,
+            @PathVariable Integer start,@PathVariable Integer end) {
+        List<Integer> dis = imitateService.imitateLast2sum(gameId,cnt,startId,endId,start,end);
+        return dis;
+    }
+    
+    
+    @GetMapping("lastsum/cal/{gameId}/{cnt}/{startId}/{endId}/{start}/{end}")
+    public double Last2DisCal(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId,
+            @PathVariable Integer start,@PathVariable Integer end) {
+        Double dis = imitateService.calLastProfit(gameId,cnt,startId,endId,start,end);
+        return dis;
+    }
+    
     
     @GetMapping("baozi/{cnt}/{startId}/{endId}")
     public String imitateBaozi(@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
@@ -118,4 +143,22 @@ public class TestController {
         return JSONArray.toJSONString(baozi);
     }
     
+    @GetMapping("feature/{gameId}/{cnt}/{startId}/{endId}")
+    public String imitateFeature(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
+        Map<String, Map<String, List<Integer>>> feature = sscDataResultService.singleDaXiaoDanShuang(gameId,cnt,startId,endId);
+        return JSONArray.toJSONString(feature);
+    }
+    
+    @GetMapping("hot/{gameId}/{cnt}/{startId}/{endId}")
+    public String hot(@PathVariable Integer gameId,@PathVariable Integer cnt,@PathVariable Long startId,@PathVariable Long endId) {
+        List<Map.Entry<Integer, Long>> feature = sscDataResultService.hot(gameId,cnt,startId,endId);
+        return JSONArray.toJSONString(feature);
+    }
+    
+    @GetMapping("imitate/hot/{gameId}/{cnt}/{startId}/{endId}/{min}/{hotnum}")
+    public String imitateHot(@PathVariable Integer gameId,@PathVariable Integer cnt,
+            @PathVariable Long startId,@PathVariable Long endId,@PathVariable Double min,@PathVariable Integer hotnum){
+        Map<String, ImitateService.HotCandidate> map = imitateService.imitateHot(gameId,cnt,startId,endId,min,hotnum);
+        return JSON.toJSONString(map);
+    }
 }

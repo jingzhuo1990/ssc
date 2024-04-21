@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @program: mediAsst
@@ -31,6 +32,8 @@ public class SscDataQuery {
     private Long cycleId;
     
     private String cycleValue;
+    
+    private List<String> cycleValues;
     
     private String result;
     

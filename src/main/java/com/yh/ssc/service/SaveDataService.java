@@ -58,7 +58,7 @@ public class SaveDataService implements Runnable{
             
             List<SscDataDTO> sscDatas = sscDataOrmService.listByCondition(SscDataQuery.builder().gameId(nowCycle.getGameId()).cycleId(nowCycle.getCycleId()).build());
             if (CollectionUtils.isNotEmpty(sscDatas)){
-                log.warn("already exist");
+//                log.warn("already exist");
             }else {
                 String lastRst = JSONObject.toJSONString(queryData.getLottery_cycle_now().getLast_cycle_game_result());
                 SscData lastSscData = updateLastCycle(

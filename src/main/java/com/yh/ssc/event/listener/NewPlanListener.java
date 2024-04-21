@@ -30,7 +30,7 @@ public class NewPlanListener {
     @Resource
     private DetailOrmService detailOrmService;
     
-    @EventListener(value = NewPlanEvent.class)
+//    @EventListener(value = NewPlanEvent.class)
     public void execute(NewPlanEvent newPlanEvent){
         try {
             log.info("new plan event:{}",newPlanEvent);
@@ -58,6 +58,35 @@ public class NewPlanListener {
         }catch(Exception e){
             log.error("NewPlanListener handler failed,{}",e);
         }
-        
     }
+    
+    @EventListener(value = NewPlanEvent.class)
+    public void executeSum(NewPlanEvent newPlanEvent){
+        try {
+            log.info("new plan event:{}",newPlanEvent);
+            PlanDTO planDTO = (PlanDTO) newPlanEvent.getSource();
+            
+            Detail detail = new Detail();
+            
+            detail.setPlanId(planDTO.getId());
+            
+            detail.setGameId(planDTO.getGameId());
+            detail.setCreateTime(new Date());
+            Integer round = 1;
+            detail.setRound(round);
+            
+            Integer multify = planDTO.getPolicyJSON().getInteger(String.valueOf(round));
+            Integer amount = multify * 43 * Common.SINGLE_AMOUNT;
+            detail.setAmount(amount);
+            detail.setMultify(multify);
+            
+            detail.setState(DetailStateEnums.RUNNING.getState());
+            detail.setCycleId(planDTO.getStartCycleId());
+            detail.setCycleValue(planDTO.getStartCycleValue());
+            detailOrmService.add(detail);
+        }catch (Exception e){
+            log.error("NewPlanListener handler failed,{}",e);
+        }
+    }
+    
 }

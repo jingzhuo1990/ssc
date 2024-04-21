@@ -32,4 +32,5 @@ public class DetailDTO {
     private Date createTime;
     private Long cycleId;
     private String cycleValue;
+    
 }

@@ -41,6 +41,17 @@ public class GameProperteries {
         return baseMultify*strategyMultify;
     }
     
+    public boolean sendReal(Integer gameId){
+        if (gameId==null || gameId<=0){
+            return false;
+        }
+        return StreamUtils.ofNullable(games)
+                .filter(x->x.getGameId().intValue()==gameId.intValue())
+                .findAny()
+                .map(Game::isSendReal)
+                .orElse(false);
+    }
+    
     public boolean allowPlan(Integer gameId){
         if (gameId==null || gameId<=0){
             return false;
@@ -58,5 +69,6 @@ public class GameProperteries {
         private Integer row;
         private Boolean plan;
         private Integer baseMultify;
+        private boolean sendReal;
     }
 }

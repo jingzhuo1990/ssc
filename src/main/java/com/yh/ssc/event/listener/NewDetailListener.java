@@ -3,6 +3,7 @@ package com.yh.ssc.event.listener;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.yh.ssc.conf.GameProperteries;
 import com.yh.ssc.constants.Common;
 import com.yh.ssc.converter.DetailConverter;
 import com.yh.ssc.converter.PlanConverter;
@@ -26,6 +27,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,11 +45,50 @@ public class NewDetailListener {
     @Resource
     private SscService sscRealService;
     @Resource
+    private SscService sscSimulateService;
+    @Resource
     private PlanOrmService planOrmService;
     @Resource
     private DetailOrmService detailOrmService;
+    @Resource
+    private GameProperteries gameProperteries;
+    
     
     @EventListener(value = NewDetailEvent.class)
+    public void executeSum(NewDetailEvent newDetailEvent){
+        try {
+            log.info("new plan detail:{}",newDetailEvent);
+            DetailDTO detailDTO = (DetailDTO) newDetailEvent.getSource();
+            List<Plan> plans = planOrmService.listByCondition(PlanQuery.builder().id(detailDTO.getPlanId()).build());
+            Plan plan = plans.get(0);
+            String sendRst = null;
+            String candidate = "[[6,7,8,9,10]]";
+            List<List<Integer>> candidateInner = JSON.parseObject(candidate, new TypeReference<List<List<Integer>>>() {});
+            if (gameProperteries.sendReal(Math.toIntExact(detailDTO.getGameId()))){
+                sendRst = sscRealService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            }else {
+                sendRst = sscSimulateService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            }
+            
+            JSONObject sendJSON = JSONObject.parseObject(sendRst);
+            if (sendJSON.containsKey("errors")){
+                log.info("send failed:{}",sendRst);
+            }else {
+                log.info("send success:{}",sendRst);
+            }
+            
+            detailDTO.setState(DetailStateEnums.SEND_OK.getState());
+            Detail detail = DetailConverter.toDO(detailDTO);
+            detailOrmService.update(detail);
+            List<Detail> details = detailOrmService.listByCondition(DetailQuery.builder().planId(plan.getId()).build());
+            plan.setCurrent(details.size());
+            planOrmService.update(plan);
+        }catch (Exception e){
+            log.error("NewDetailListener failed {}",e);
+        }
+    }
+    
+//    @EventListener(value = NewDetailEvent.class)
     public void execute(NewDetailEvent newDetailEvent){
         try {
             log.info("new plan detail:{}",newDetailEvent);
@@ -56,7 +97,13 @@ public class NewDetailListener {
             Plan plan = plans.get(0);
             String candidate = plan.getCandidate();
             List<List<Integer>> candidateInner = JSON.parseObject(candidate, new TypeReference<List<List<Integer>>>() {});
-            String sendRst = sscRealService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            String sendRst = null;
+            if (gameProperteries.sendReal(Math.toIntExact(detailDTO.getGameId()))){
+                sendRst = sscRealService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            }else {
+                sendRst = sscSimulateService.send(detailDTO.getGameId(),detailDTO.getCycleId(),detailDTO.getMultify(),candidateInner);
+            }
+            
             JSONObject sendJSON = JSONObject.parseObject(sendRst);
             if (sendJSON.containsKey("errors")){
                 log.info("send failed:{}",sendRst);
@@ -139,7 +186,7 @@ public class NewDetailListener {
         newDetail.setGameId(oldDetail.getGameId());
         
         Integer multify = planDTO.getPolicyJSON().getInteger(String.valueOf(round));
-        Integer amount = multify * Common.SINGLE_AMOUNT;
+        Integer amount = multify * 43 * Common.SINGLE_AMOUNT;
         
         newDetail.setMultify(multify);
         newDetail.setRound(round);

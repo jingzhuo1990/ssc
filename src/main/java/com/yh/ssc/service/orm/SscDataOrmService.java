@@ -2,14 +2,17 @@ package com.yh.ssc.service.orm;
 
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yh.ssc.converter.SscDataConverter;
 import com.yh.ssc.utils.StreamUtils;
 import com.yh.ssc.data.dataobject.SscData;
 import com.yh.ssc.dto.SscDataDTO;
 import com.yh.ssc.data.query.SscDataQuery;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,14 +44,25 @@ public interface SscDataOrmService extends IService<SscData> {
         if (StringUtils.isNotEmpty(cycleValue)){
             queryWrapper.eq("cycle_value", cycleValue);
         }
+        if (CollectionUtils.isNotEmpty(query.getCycleValues())){
+            queryWrapper.in("cycle_value", query.getCycleValues());
+        }
         if (gameId!=null && gameId>0){
             queryWrapper.eq("game_id", gameId);
         }
         if (startTime!=null && endTime!=null){
             queryWrapper.between("create_time", startTime, endTime);
         }
+        List<SscData> sscData = new ArrayList<>();
+        if (query.getLimit()!=null && query.getLimit()>0){
+            queryWrapper.orderByDesc("id");
+            Page<SscData> page = new Page<>(1, 20);
+            Page<SscData> sscDataPage = page(page,queryWrapper);
+            sscData = sscDataPage.getRecords();
+        }else {
+            sscData = list(queryWrapper);
+        }
         
-        List<SscData> sscData = list(queryWrapper);
         List<SscDataDTO> sscDataDTOS = StreamUtils.ofNullable(sscData)
                 .map(x-> SscDataConverter.toDTO(x))
                 .collect(Collectors.toList());

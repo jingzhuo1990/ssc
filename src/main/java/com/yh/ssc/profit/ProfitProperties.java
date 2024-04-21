@@ -35,6 +35,7 @@ public class ProfitProperties {
             
             Double currentProfit = profit.getMultify() * Common.SINGLE_PROFIT;
             profit.setProfit(currentProfit-totalCost);
+            profit.setTotalCost(totalCost);
         }
         this.profits = profits;
     }

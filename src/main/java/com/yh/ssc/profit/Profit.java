@@ -18,4 +18,6 @@ public class Profit {
     private Double cost;
     
     private Double profit;
+    
+    private Double totalCost;
 }

@@ -7,14 +7,15 @@ import lombok.Data;
 public class Input {
 
     private Integer game_id = 190;
-    private Integer game_type_id=65;
+//    private Integer game_type_id=65;
+    private Integer game_type_id=51;
 
     private Long game_cycle_id;
 
     //[[\"0\",\"1\",\"3\",\"4\",\"7\"],[],[],[],[]]
     private String bet_info;
 
-    private String bet_mode = "TwoYuan";
+    private String bet_mode = "TwoJiao";
 
     private Integer bet_multiple;
 

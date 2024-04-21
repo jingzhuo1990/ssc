@@ -7,13 +7,16 @@ import com.yh.ssc.dto.SscDataDTO;
 import com.yh.ssc.data.query.SscDataQuery;
 import com.yh.ssc.enmus.FeatureEnums;
 import com.yh.ssc.enmus.IndexEnums;
+import com.yh.ssc.enmus.SingleFeature;
 import com.yh.ssc.service.orm.SscDataOrmService;
 import com.yh.ssc.utils.StreamUtils;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -114,6 +117,119 @@ public class SscDataResultSimulateService implements SscDataResultService{
         return parseAllBaoziInterval(sscDataDTOS,cnt);
     }
     
+    @Override
+    public Map<String, Map<String, List<Integer>>> singleDaXiaoDanShuang(Integer gameId, Integer cnt, Long startId,
+            Long endId) {
+        Map<String, Map<String, List<Integer>>> intervals = new HashMap<>();
+        List<SscDataDTO> sscDataDTOS = sscDataOrmService.listByCondition(SscDataQuery.builder().startId(startId).endId(endId).build());
+        sscDataDTOS = sscDataDTOS.stream().filter(x->x.getNowData()!=null && x.getNowData().getWan()!=null).collect(Collectors.toList());
+        sscDataDTOS.sort(Comparator.comparing(SscDataDTO::getCycleValue));
+        
+        List<Integer> wan = StreamUtils.ofNullable(sscDataDTOS).map(x->x.getNowData().getWan()).collect(Collectors.toList());
+        intervals.put(IndexEnums.WAN.getSubType(),parseDaxiaoDanShuang(wan,cnt));
+        
+        List<Integer> qian = StreamUtils.ofNullable(sscDataDTOS).map(x->x.getNowData().getQian()).collect(Collectors.toList());
+        intervals.put(IndexEnums.QIAN.getSubType(),parseDaxiaoDanShuang(qian,cnt));
+        
+        List<Integer> bai = StreamUtils.ofNullable(sscDataDTOS).map(x->x.getNowData().getBai()).collect(Collectors.toList());
+        intervals.put(IndexEnums.BAI.getSubType(), parseDaxiaoDanShuang(bai,cnt));
+        
+        List<Integer> shi = StreamUtils.ofNullable(sscDataDTOS).map(x->x.getNowData().getShi()).collect(Collectors.toList());
+        intervals.put(IndexEnums.SHI.getSubType(),parseDaxiaoDanShuang(shi,cnt));
+        
+        List<Integer> ge = StreamUtils.ofNullable(sscDataDTOS).map(x->x.getNowData().getGe()).collect(Collectors.toList());
+        intervals.put(IndexEnums.GE.getSubType(), parseDaxiaoDanShuang(ge,cnt));
+        
+        return intervals;
+    }
+    
+    @Override
+    public List<Map.Entry<Integer, Long>> hot(Integer gameId, Integer cnt, Long startId, Long endId) {
+        List<SscDataDTO> sscDataDTOS = sscDataOrmService.listByCondition(SscDataQuery.builder().startId(startId).endId(endId).build());
+        sscDataDTOS = sscDataDTOS.stream().filter(x->x.getNowData()!=null && x.getNowData().getWan()!=null).collect(Collectors.toList());
+        sscDataDTOS.sort(Comparator.comparing(SscDataDTO::getCycleValue));
+        
+        List<Integer> nums = new ArrayList<>();
+        sscDataDTOS.stream().forEach(x->{
+            nums.add(x.getNowData().getWan().intValue());
+            nums.add(x.getNowData().getQian().intValue());
+            nums.add(x.getNowData().getBai().intValue());
+            nums.add(x.getNowData().getShi().intValue());
+            nums.add(x.getNowData().getGe().intValue());
+        });
+        
+        // 使用Stream API来统计每个数字的出现次数并排序
+        Map<Integer, Long> frequencyMap = nums.stream()
+                .collect(Collectors.groupingBy(n -> n, Collectors.counting()));
+        
+        List<Map.Entry<Integer, Long>> sortedEntries = frequencyMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.<Integer, Long>comparingByValue().reversed())
+                .limit(3)
+                .collect(Collectors.toList());
+        
+        // 打印排序后的结果
+        sortedEntries.forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+        return sortedEntries;
+    }
+    
+    private Map<String, List<Integer>> parseDaxiaoDanShuang(List<Integer> singleData,Integer cnt){
+        List<DataFeature> dataFeatures = StreamUtils.ofNullable(singleData).map(single->{
+            DataFeature dataFeature = new DataFeature();
+            dataFeature.setNum(single);
+            dataFeature.setSizeFeature(SingleFeature.daxiao(single));
+            dataFeature.setOddFeature(SingleFeature.danshuang(single));
+            return dataFeature;
+        }).collect(Collectors.toList());
+        
+        Map<String,List<Integer>> interval = new HashMap<>();
+        
+        Map<String, Integer> lastIndexMap = new HashMap<>();
+        
+        for (int i=0;i<dataFeatures.size();i++){
+            DataFeature feature = dataFeatures.get(i);
+            String sizefeature = feature.getSizeFeature().name();
+            String oddfeature = feature.getOddFeature().name();
+            // 检查数字是否之前出现过
+            if (lastIndexMap.containsKey(sizefeature)) {
+                // 如果出现过，则计算间隔并存储或更新间隔统计Map
+                int gap = i - lastIndexMap.get(sizefeature) - 1; // 减去1得到实际间隔
+                if (cnt!=null && gap>=cnt){
+                    if (interval.containsKey(sizefeature)){
+                        interval.get(sizefeature).add(gap);
+                    }else {
+                        interval.put(sizefeature,Lists.newArrayList(gap));
+                    }
+                }
+            }
+            lastIndexMap.put(sizefeature,i);
+            if (lastIndexMap.containsKey(oddfeature)) {
+                // 如果出现过，则计算间隔并存储或更新间隔统计Map
+                int gap = i - lastIndexMap.get(oddfeature) - 1; // 减去1得到实际间隔
+                if (cnt!=null && gap>=cnt){
+                    if (interval.containsKey(oddfeature)){
+                        interval.get(oddfeature).add(gap);
+                    }else {
+                        interval.put(oddfeature,Lists.newArrayList(gap));
+                    }
+                }
+            }
+            // 存储或更新这个数字的最后一次出现索引
+            lastIndexMap.put(oddfeature, i);
+        }
+        return interval;
+    }
+    
+    @Data
+    public static class DataFeature{
+        private Integer num;
+        
+        private SingleFeature sizeFeature;
+        
+        private SingleFeature oddFeature;
+        
+    }
+    
     private Map<Boolean,List<Integer>> parseAllBaoziInterval(List<SscDataDTO> sscDataDTOS,Integer cnt){
         Map<Boolean,List<Integer>> interval = new HashMap<>();
         
@@ -178,7 +294,7 @@ public class SscDataResultSimulateService implements SscDataResultService{
     
     
     
-    private Map<Integer,List<Integer>> parseDistribution(List<Integer> data,Integer cnt){
+    public Map<Integer,List<Integer>> parseDistribution(List<Integer> data,Integer cnt){
         // 使用Map来存储每个数字的间隔统计
         Map<Integer,List<Integer>> interval = new HashMap<>();
         

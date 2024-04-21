@@ -65,6 +65,11 @@ public class SscDataDTO {
         
     }
     
+    public Integer getLastSum(){
+        List<Integer> resultInt = JSONArray.parseArray(getLastData().getResult(),Integer.class);
+        return resultInt.get(3)+resultInt.get(4);
+    }
+    
     public Integer getByIndex(int index) {
         List<Integer> resultInt = JSONArray.parseArray(getLastData().getResult(),Integer.class);
         return resultInt.get(index);
